@@ -1,3 +1,9 @@
+# 主版本
+VERSION ?= $(shell git describe --tags --always --dirty)
+
+# build 序列
+BUILD_NO ?= $(shell git show -s --format=%H)
+
 # Go文件列表
 GOFILES := $(shell find . ! -path "./vendor/*" -name "*.go")
 

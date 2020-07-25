@@ -1,6 +1,12 @@
 # 目标可执行程序名称
 NAME=testing
 
+# 主版本
+VERSION ?= $(shell git describe --tags --always --dirty)
+
+# build 序列
+BUILD_NO ?= $(shell git show -s --format=%H)
+
 # go文件列表
 GOFILES := $(shell find . ! -path "./vendor/*" -name "*.go")
 
