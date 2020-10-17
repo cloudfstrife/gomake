@@ -4,8 +4,8 @@ NAME=testing
 # 主版本
 VERSION ?= $(shell git describe --tags --always --dirty)
 
-# build 序列
-BUILD_NO ?= $(shell git show -s --format=%H)
+# git 提交 Hash
+COMMIT_HASH ?= $(shell git show -s --format=%H)
 
 # go文件列表
 GOFILES := $(shell find . ! -path "./vendor/*" -name "*.go")
@@ -17,6 +17,9 @@ GOARCHES := 386 amd64
 
 # 目标输出目录
 DIST_FOLDER := dist
+
+# 版本构建目录
+RELEASE_FOLDER := release
 
 # 构建附加选项
 BUILD_OPTS := -ldflags "-s -w"
@@ -36,7 +39,10 @@ COVER_REPORT := ${REPORT_FOLDER}/cover.report
 GOLANGCI_LINT_REPORT := ${REPORT_FOLDER}/golangci-lint.xml 
 GOLINT_REPORT := ${REPORT_FOLDER}/golint.report 
 
-.PHONY: build format test benchmark sonar all clean
+# Docker 镜像仓库
+REGISTRY ?= repo.xxxx.xxx/xxxx
+
+.PHONY: build format test benchmark sonar all clean container push-container
 
 .DEFAULT: build 
 
@@ -50,7 +56,7 @@ ${DIST_FOLDER}/${NAME}/${NAME}: ${GOFILES}
 format:
 	@for f in ${GOFILES} ; do 																			\
 		gofmt -w $${f};																					\
-	done																								\
+	done
 
 # 单元测试
 test: 
@@ -81,7 +87,14 @@ all:
 				go build ${BUILD_OPTS} -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME} ;				\
 			fi																							\
 		done																							\
-	done																								\
+	done
+
+container: ${DIST_FOLDER}/${NAME}/${NAME}
+	docker build -t ${REGISTRY}/${NAME}:${VERSION}-${BUILD_TIME}				\
+	    -f ${RELEASE_FOLDER}/Dockerfile .;
+
+push-container: container
+	docker push ${REGISTRY}/${NAME}:${VERSION}-${BUILD_TIME}
 
 # 清理
 clean:
