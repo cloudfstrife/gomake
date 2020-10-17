@@ -30,6 +30,8 @@ The project is in v1.0 version.
 * `make sonar` SonarQube integration
 * `make all` build all platform executable file
 * `make clean` remove $DIST_FOLDER and SonarQube report file 
+* `make container` build docker image
+* `make push-container` push docker image to docker repository
 
 ## Documentation
 
@@ -41,4 +43,3 @@ We welcome any code or non-code contribution!
 ## Licensing
 
 licensed by the MIT License. See [LICENSE](./LICENSE) for the full license text.
-
