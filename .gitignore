@@ -18,6 +18,9 @@ vendor/
 .vscode
 .idea
 
+# go.sum
+go.sum
+
 # binary
 /dist/*
 !/dist/README.md
