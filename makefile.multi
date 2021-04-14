@@ -22,7 +22,7 @@ RELEASE_FOLDER := release
 COMMAND_ROOT := cmd
 
 # 构建附加选项
-BUILD_OPTS := -ldflags "-s -w"
+BUILD_OPTS := -race -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
 # 单元测试附加选项
 TEST_OPTS := -v
@@ -31,7 +31,7 @@ TEST_OPTS := -v
 BENCHMARK_OPTS := -cpu 1,2,3,4,5,6,7,8
 
 # 目标可执行程序列表
-COMMAND_LIST := testing running
+COMMAND_LIST := $(shell ls -l ${COMMAND_ROOT} | grep "^d" | awk '{print $$9}')
 
 # sonar 相关报告输出路径（包括：单元测试报告输出，单元测试覆盖率报告，golint 报告，golangci-lint 报告）
 REPORT_FOLDER := sonar

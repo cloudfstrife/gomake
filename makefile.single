@@ -22,7 +22,7 @@ DIST_FOLDER := dist
 RELEASE_FOLDER := release
 
 # 构建附加选项
-BUILD_OPTS := -ldflags "-s -w"
+BUILD_OPTS := -race -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
 # 单元测试附加选项
 TEST_OPTS := -v
