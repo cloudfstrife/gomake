@@ -7,6 +7,9 @@ VERSION ?= $(shell git describe --tags --always --dirty)
 # git 提交 Hash
 COMMIT_HASH ?= $(shell git show -s --format=%H)
 
+# build 时间
+BUILD_TIME ?= $(shell date +"%F %T")
+
 # go文件列表
 GOFILES := $(shell find . ! -path "./vendor/*" -name "*.go")
 
