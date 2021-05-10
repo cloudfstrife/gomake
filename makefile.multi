@@ -1,76 +1,80 @@
-# 主版本
+# main version
 VERSION ?= $(shell git describe --tags --always --dirty)
 
-# git 提交 Hash
+# git commit Hash
 COMMIT_HASH ?= $(shell git show -s --format=%H)
 
-# build 时间
+# build at
 BUILD_TIME ?= $(shell date +"%F %T")
 
-# Go文件列表
+# go source file list
 GOFILES := $(shell find . ! -path "./vendor/*" -name "*.go")
 
-# 支持的操作系统列表
+# build environment
+BUILD_ENV := 
+
+# unit test environment
+TEST_ENV := 
+
+# benchmark test environment
+BENCHMARK_ENV := 
+
+# operating system
 GOOSES := linux windows darwin plan9
-# 支持的CPU架构
+
+# compilation architecture
 GOARCHES := 386 amd64
 
-# 目标输出目录
+# output folder
 DIST_FOLDER := dist
 
-# 版本构建目录
-RELEASE_FOLDER := release
-
-# 目标可执行程序源码所在的目录
+# folder name which include all target executable program source code 
 COMMAND_ROOT := cmd
 
-# 构建附加选项
+# build options
 BUILD_OPTS := -race -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
-# 单元测试附加选项
+# unit test options
 TEST_OPTS := -v
 
-# 基准测试附加选项
+# benchmark test options
 BENCHMARK_OPTS := -cpu 1,2,3,4,5,6,7,8
 
-# 目标可执行程序列表
+# target executable program name list
 COMMAND_LIST := $(shell ls -l ${COMMAND_ROOT} | grep "^d" | awk '{print $$9}')
 
-# sonar 相关报告输出路径（包括：单元测试报告输出，单元测试覆盖率报告，golint 报告，golangci-lint 报告）
+# sonar report output folder
 REPORT_FOLDER := sonar
 
-# sonar report
+# sonar report file list
 TEST_REPORT := ${REPORT_FOLDER}/test.report 
 COVER_REPORT := ${REPORT_FOLDER}/cover.report
 GOLANGCI_LINT_REPORT := ${REPORT_FOLDER}/golangci-lint.xml 
 GOLINT_REPORT := ${REPORT_FOLDER}/golint.report 
 
-# Docker 镜像仓库
-REGISTRY ?= repo.xxxx.xxx/xxxx
-
-.PHONY: build format test benchmark sonar all clean container push-container
+.PHONY: build format test benchmark sonar all clean
 
 .DEFAULT: build 
 
-# 构建目标
+# build target executable program
 build: $(GOFILES)
-	@for command in ${COMMAND_LIST} ; do 																		\
-		go build ${BUILD_OPTS} -o ${DIST_FOLDER}/$${command}/$${command} ./${COMMAND_ROOT}/$${command} ;		\
+	@for command in ${COMMAND_LIST} ; do 																					\
+		${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/$${command}/$${command} ./${COMMAND_ROOT}/$${command} ;		\
 	done
 
-# 格式化
+# format go code
 format:
-	@for f in ${GOFILES} ; do 																					\
-		gofmt -w $${f};																							\
+	@for f in ${GOFILES} ; do 																								\
+		gofmt -w $${f};																										\
 	done
 
-# 单元测试
+# unit test
 test: 
-	go test ${TEST_OPTS} ./...
+	${TEST_ENV} go test ${TEST_OPTS} ./...
 
-# 基准测试
+# benchmark test
 benchmark:
-	go test -bench . -run ^$$ ${BENCHMARK_OPTS}  ./...
+	${BENCHMARK_ENV} go test -bench . -run ^$$ ${BENCHMARK_OPTS}  ./...
 
 # sonar
 sonar: 
@@ -81,34 +85,27 @@ sonar:
 	golint ./... > ${GOLINT_REPORT}
 	sonar-scanner
 
-# 构建所有支持的操作系统和架构的目标文件
+# cross compiling
 all:
-	@for command in ${COMMAND_LIST} ; do 																	\
-		for os in ${GOOSES} ; do																			\
-			for arch in ${GOARCHES} ; do 																	\
-				if [ "$${os}" = "windows" ] ;then															\
-					GOOS=$${os} GOARCH=$${arch}  															\
-					go build ${BUILD_OPTS} 																	\
-					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command}.exe 							\
-					./${COMMAND_ROOT}/$${command} ;															\
-				else																						\
-					GOOS=$${os} GOARCH=$${arch}  															\
-					go build ${BUILD_OPTS} 																	\
-					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command} 								\
-					./${COMMAND_ROOT}/$${command} ;															\
-				fi																							\
-			done																							\
-		done																								\
+	@for command in ${COMMAND_LIST} ; do 																					\
+		for os in ${GOOSES} ; do																							\
+			for arch in ${GOARCHES} ; do 																					\
+				if [ "$${os}" = "windows" ] ;then																			\
+					GOOS=$${os} GOARCH=$${arch}  																			\
+					${BUILD_ENV} go build ${BUILD_OPTS} 																	\
+					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command}.exe 											\
+					./${COMMAND_ROOT}/$${command} ;																			\
+				else																										\
+					GOOS=$${os} GOARCH=$${arch}  																			\
+					${BUILD_ENV} go build ${BUILD_OPTS} 																	\
+					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command} 												\
+					./${COMMAND_ROOT}/$${command} ;																			\
+				fi																											\
+			done																											\
+		done																												\
 	done
 
-container: ${DIST_FOLDER}/${NAME}/${NAME}
-	docker build -t ${REGISTRY}/${NAME}:${VERSION}-${BUILD_TIME}				\
-	    -f ${RELEASE_FOLDER}/Dockerfile .;
-	
-push-container: container
-	docker push ${REGISTRY}/${NAME}:${VERSION}-${BUILD_TIME}
-
-# 清理
+# clean target executable program and sonar report
 clean:
 	-rm -rf $(DIST_FOLDER)/*
 	-rm -f ${TEST_REPORT}
