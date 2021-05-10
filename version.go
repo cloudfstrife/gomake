@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	// Version 版本
+	// Version version
 	Version string
-	// CommitHash git 提交 hash 值
+	// CommitHash git commit hash
 	CommitHash string
-	// BuildTime 构建时间
+	// BuildTime built at
 	BuildTime string
 )
 
-// ShowVersion 输出版本信息
+// ShowVersion output version
 func ShowVersion(w io.Writer) {
 	fmt.Fprintf(w,
 		`Version
