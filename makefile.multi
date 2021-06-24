@@ -32,7 +32,7 @@ DIST_FOLDER := dist
 COMMAND_ROOT := cmd
 
 # build options
-BUILD_OPTS := -race -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
+BUILD_OPTS := -race -trimpath -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
 # unit test options
 TEST_OPTS := -v
@@ -59,7 +59,7 @@ GOLINT_REPORT := ${REPORT_FOLDER}/golint.report
 # build target executable program
 build: $(GOFILES)
 	@for command in ${COMMAND_LIST} ; do 																					\
-		${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/$${command}/$${command} ./${COMMAND_ROOT}/$${command} ;		\
+		${BUILD_ENV} go build -o ${DIST_FOLDER}/$${command}/$${command} ${BUILD_OPTS} ./${COMMAND_ROOT}/$${command} ;		\
 	done
 
 # format go code
@@ -92,14 +92,12 @@ all:
 			for arch in ${GOARCHES} ; do 																					\
 				if [ "$${os}" = "windows" ] ;then																			\
 					GOOS=$${os} GOARCH=$${arch}  																			\
-					${BUILD_ENV} go build ${BUILD_OPTS} 																	\
-					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command}.exe 											\
-					./${COMMAND_ROOT}/$${command} ;																			\
+					${BUILD_ENV} go build -o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command}.exe						\
+					${BUILD_OPTS} ./${COMMAND_ROOT}/$${command} ;															\
 				else																										\
 					GOOS=$${os} GOARCH=$${arch}  																			\
-					${BUILD_ENV} go build ${BUILD_OPTS} 																	\
-					-o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command} 												\
-					./${COMMAND_ROOT}/$${command} ;																			\
+					${BUILD_ENV} go build -o ${DIST_FOLDER}/$${command}/$${os}_$${arch}/$${command} 						\
+					${BUILD_OPTS} ./${COMMAND_ROOT}/$${command} ;															\
 				fi																											\
 			done																											\
 		done																												\

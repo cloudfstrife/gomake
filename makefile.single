@@ -32,7 +32,7 @@ GOARCHES := 386 amd64
 DIST_FOLDER := dist
 
 # build options
-BUILD_OPTS := -race -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
+BUILD_OPTS := -race -trimpath -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
 # unit test options
 TEST_OPTS := -v
@@ -57,7 +57,7 @@ build: ${DIST_FOLDER}/${NAME}/${NAME}
 
 # build target executable program
 ${DIST_FOLDER}/${NAME}/${NAME}: ${GOFILES}
-	${BUILD_ENV} go build ${BUILD_OPTS} -o $@ 
+	${BUILD_ENV} go build -o $@ ${BUILD_OPTS} 
 
 # format go code
 format:
@@ -88,10 +88,10 @@ all:
 		for arch in ${GOARCHES} ; do 																				\
 			if [ "$${os}" = "windows" ] ;then																		\
 				GOOS=$${os} GOARCH=$${arch}  																		\
-				${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME}.exe ;			\
+				${BUILD_ENV} go build -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME}.exe ${BUILD_OPTS} ;			\
 			else																									\
 				GOOS=$${os} GOARCH=$${arch}  																		\
-				${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME} ;				\
+				${BUILD_ENV} go build -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME} ${BUILD_OPTS} ;				\
 			fi																										\
 		done																										\
 	done
