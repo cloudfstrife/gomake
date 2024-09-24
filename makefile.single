@@ -55,7 +55,7 @@ SONAR_TOKEN=
 
 .PHONY: build format test benchmark sonar all clean
 
-.DEFAULT: build 
+.DEFAULT_GOAL := build
 
 build: ${DIST_FOLDER}/${NAME}
 

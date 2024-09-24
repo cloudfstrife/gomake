@@ -36,6 +36,7 @@ SONAR_SERVICE=http://xxx.xxx.xxx.xxx:9000
 SONAR_TOKEN=
 
 .PHONY: format test benchmark sonar clean
+.DEFAULT_GOAL := test
 
 # format go code
 format:
