@@ -31,6 +31,9 @@ go.sum
 sonar/
 
 # binary
-/target/*
+/target/*/**
 !/target/debug/README.md
 !/target/release/README.md
+
+# sonar-scanner
+/.scannerwork
