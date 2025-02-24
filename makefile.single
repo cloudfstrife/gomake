@@ -29,10 +29,16 @@ GOOSES := linux windows darwin plan9
 GOARCHES := 386 amd64
 
 # output folder
-DIST_FOLDER := target/debug
+BUILD_FOLDER := target/debug
+
+# output folder
+RELEASE_FOLDER := target/release
 
 # build options
 BUILD_OPTS := -trimpath -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
+
+# release options
+RELEASE_OPTS := -trimpath -ldflags "-s -w -X 'main.Version=${VERSION}' -X 'main.CommitHash=${COMMIT_HASH}' -X 'main.BuildTime=${BUILD_TIME}'"
 
 # unit test options
 TEST_OPTS := -v
@@ -53,14 +59,14 @@ GO_VET_REPORT := ${REPORT_FOLDER}/go_vet.report
 SONAR_SERVICE=http://xxx.xxx.xxx.xxx:9000
 SONAR_TOKEN=
 
-.PHONY: build format test benchmark sonar all clean
+.PHONY: build format test benchmark sonar release clean
 
 .DEFAULT_GOAL := build
 
-build: ${DIST_FOLDER}/${NAME}
+build: ${BUILD_FOLDER}/${NAME}
 
 # build target executable program
-${DIST_FOLDER}/${NAME}: ${GOFILES}
+${BUILD_FOLDER}/${NAME}: ${GOFILES}
 	${BUILD_ENV} go build ${BUILD_OPTS} -o $@ 
 
 # format go code
@@ -92,22 +98,23 @@ sonar:
 	-Dproject.settings=target/sonar-project.properties
 
 # cross compiling
-all:
+release:
 	@for os in ${GOOSES} ; do																						\
 		for arch in ${GOARCHES} ; do 																				\
 			if [ "$${os}" = "windows" ] ;then																		\
 				GOOS=$${os} GOARCH=$${arch}  																		\
-				${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME}.exe ;			\
+				${BUILD_ENV} go build ${RELEASE_OPTS} -o ${RELEASE_FOLDER}/$${os}_$${arch}/${NAME}.exe ;			\
 			else																									\
 				GOOS=$${os} GOARCH=$${arch}  																		\
-				${BUILD_ENV} go build ${BUILD_OPTS} -o ${DIST_FOLDER}/${NAME}/$${os}_$${arch}/${NAME} ;				\
+				${BUILD_ENV} go build ${RELEASE_OPTS} -o ${RELEASE_FOLDER}/$${os}_$${arch}/${NAME} ;				\
 			fi																										\
 		done																										\
 	done
 
 # clean target executable program and sonar report
 clean:
-	-rm -rf $(DIST_FOLDER)/*
+	-rm -rf $(BUILD_FOLDER)/*
+	-rm -rf $(RELEASE_FOLDER)/*
 	-rm -f ${TEST_REPORT}
 	-rm -f ${COVER_REPORT}
 	-rm -f ${GOLANGCI_LINT_REPORT}
