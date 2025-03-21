@@ -28,7 +28,8 @@ go.work
 go.sum
 
 # sonar
-sonar/
+/sonar/*/**
+!/sonar/sonar-project.properties
 
 # binary
 /target/*/**
